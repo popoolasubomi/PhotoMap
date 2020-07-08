@@ -42,6 +42,7 @@ static NSString * const clientSecret = @"W2AOE1TYC4MHK5SZYOUGX0J3LVRALMPB4CXT3ZH
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     LocationCell *cell = [tableView dequeueReusableCellWithIdentifier:@"LocationCell" forIndexPath:indexPath];
+    [cell updateWithLocation: self.results[indexPath.row]];
     return cell;
 }
 
@@ -50,6 +51,7 @@ static NSString * const clientSecret = @"W2AOE1TYC4MHK5SZYOUGX0J3LVRALMPB4CXT3ZH
     NSDictionary *venue = self.results[indexPath.row];
     NSNumber *lat = [venue valueForKeyPath:@"location.lat"];
     NSNumber *lng = [venue valueForKeyPath:@"location.lng"];
+    [self.delegate locationsViewController: self didPickLocationWithLatitude: lat longitude: lng];
     NSLog(@"%@, %@", lat, lng);
 }
 
@@ -82,5 +84,6 @@ static NSString * const clientSecret = @"W2AOE1TYC4MHK5SZYOUGX0J3LVRALMPB4CXT3ZH
     }];
     [task resume];
 }
+
 
 @end
