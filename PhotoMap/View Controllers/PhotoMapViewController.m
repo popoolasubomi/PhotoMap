@@ -10,7 +10,7 @@
 #import "LocationsViewController.h"
 #import <MapKit/MapKit.h>
 
-@interface PhotoMapViewController () <LocationsViewControllerDelegate>
+@interface PhotoMapViewController () <LocationsViewControllerDelegate, MKMapViewDelegate>
 
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
 @property (nonatomic, weak) UIImageView *pictureChosen;
@@ -84,7 +84,7 @@
 - (void) imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info {
     
     UIImage *editedImage = info[UIImagePickerControllerEditedImage];
-    self.pictureChosen.image = [self resizeImage: editedImage withSize: CGSizeMake(414, 414)];
+    self.pictureChosen.image = editedImage;
     
     [self dismissViewControllerAnimated:YES completion:nil];
 }
@@ -103,7 +103,32 @@
 }
 
 - (void)locationsViewController:(LocationsViewController *)controller didPickLocationWithLatitude:(NSNumber *)latitude longitude:(NSNumber *)longitude {
+     CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(latitude.floatValue, longitude.floatValue);
+     MKPointAnnotation *annotation = [MKPointAnnotation new];
+     annotation.coordinate = coordinate;
+     annotation.title = @"Picture!";
+     [self.mapView addAnnotation:annotation];
      [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation {
+    MKPinAnnotationView *annotationView = (MKPinAnnotationView*)[mapView dequeueReusableAnnotationViewWithIdentifier:@"Pin"];
+    if (annotationView == nil) {
+        annotationView = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:@"Pin"];
+        annotationView.canShowCallout = true;
+        annotationView.leftCalloutAccessoryView = [[UIImageView alloc] initWithFrame:CGRectMake(0.0, 0.0, 50.0, 50.0)];
+        annotationView.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+        annotationView.image = [self resizeImage: self.pictureChosen.image withSize:CGSizeMake(50.0, 50.0)];
+    }
+
+    UIImageView *imageView = (UIImageView*)annotationView.leftCalloutAccessoryView;
+    imageView.image = [UIImage imageNamed:@"camera"];
+
+    return annotationView;
+}
+
+- (void)mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view calloutAccessoryControlTapped:(UIControl *)control {
+    [self performSegueWithIdentifier:@"fullImageSegue" sender:self];
 }
 
 
